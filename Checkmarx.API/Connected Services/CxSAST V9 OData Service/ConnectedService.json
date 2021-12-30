@@ -11,7 +11,7 @@
     "IgnoreUnexpectedElementsAndAttributes": false,
     "IncludeT4File": false,
     "ServiceName": "CxSAST V9 OData Service",
-    "Endpoint": "https://serverV9.checkmarx.net/CxWebInterface/odata/v1/$metadata",
+    "Endpoint": "https://localhost/CxWebInterface/odata/v1/$metadata",
     "EdmxVersion": {
       "Major": 4,
       "Minor": 0,

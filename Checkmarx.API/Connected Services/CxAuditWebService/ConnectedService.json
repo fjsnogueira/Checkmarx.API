@@ -6,14 +6,14 @@
   },
   "ExtendedData": {
     "inputs": [
-      "http://localhost/Cxwebinterface/CxWebService_Audit.asmx?wsdl"
+      "http://localhost/Cxwebinterface/Audit/CxAuditWebService.asmx?wsdl"
     ],
     "collectionTypes": [
       "System.Collections.Generic.Dictionary`2",
       "System.Collections.Generic.List`1"
     ],
     "namespaceMappings": [
-      "*, cxPortalWebService93"
+      "*, CxAuditWebService"
     ],
     "references": [
       "Capri, {Capri, 0.0.1}",
@@ -64,6 +64,7 @@
       "System.Text.Json, {System.Text.Json, 4.6.0}",
       "System.Windows.Extensions, {System.Windows.Extensions, 4.7.0}"
     ],
+    "sync": true,
     "targetFramework": "netcoreapp3.1",
     "typeReuseMode": "All"
   }

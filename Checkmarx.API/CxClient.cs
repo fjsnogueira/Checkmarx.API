@@ -1,8 +1,15 @@
 ﻿using Capri;
+using Checkmarx.API.OSA;
+using Checkmarx.API.SAST;
+using CxAuditWebService;
+using CxDataRepository;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PortalSoap;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
@@ -13,15 +20,9 @@ using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Text;
 using System.Threading;
-using Checkmarx.API.OSA;
-using Checkmarx.API.SAST;
 using System.Xml.Linq;
-using CxDataRepository;
-using PortalSoap;
+using Project = CxDataRepository.Project;
 using Scan = Checkmarx.API.SAST.Scan;
-using System.Threading.Tasks;
-using System.Diagnostics;
-using System.Globalization;
 
 namespace Checkmarx.API
 {
@@ -66,6 +67,8 @@ namespace Checkmarx.API
 
 
         private cxPortalWebService93.CxPortalWebServiceSoapClient _cxPortalWebServiceSoapClientV9;
+
+        private CxAuditWebService.CxAuditWebServiceSoapClient _cxAuditWebServiceSoapClient;
 
         private Dictionary<long, CxDataRepository.Scan> _scanCache;
 
@@ -313,6 +316,17 @@ namespace Checkmarx.API
                             return response;
                         });
 
+                        _cxAuditWebServiceSoapClient = new CxAuditWebServiceSoapClient(baseServer, TimeSpan.FromSeconds(60), userName, password);
+                        var auditChannelFactory = _cxAuditWebServiceSoapClient.ChannelFactory;
+                        auditChannelFactory.UseMessageInspector(async (request, channel, next) =>
+                        {
+                            HttpRequestMessageProperty reqProps = new HttpRequestMessageProperty();
+                            reqProps.Headers.Add("Authorization", $"Bearer {authToken}");
+                            request.Properties.Add(HttpRequestMessageProperty.Name, reqProps);
+                            var response = await next(request);
+                            return response;
+                        });
+
                         #endregion
 
                         // ODATA V9
@@ -484,6 +498,24 @@ namespace Checkmarx.API
                 }
             }
 
+        }
+
+
+        /// <summary>
+        /// Creates Manage Fields in SAST.
+        /// </summary>
+        /// <param name="scanId">Name of the Fields</param>
+        public byte[] GetSourceCode(long scanID)
+        {
+            checkConnection();
+
+            var result = _cxAuditWebServiceSoapClient.GetSourceCodeForScanAsync(_soapSessionId, scanID).Result;
+            if (!result.IsSuccesfull)
+            {
+                throw new Exception(result.ErrorMessage);
+            }
+
+            return result.sourceCodeContainer.ZippedFile;
         }
 
         /// <summary>
@@ -829,22 +861,34 @@ namespace Checkmarx.API
 
         #region SAST
 
-        public void RunSASTScan(long projectId, string comment = "")
+        public void ReScan(long projectId, byte[] zipdata, string comment = "")
         {
             checkConnection();
 
-            var projectResponse = _cxPortalWebServiceSoapClient.GetProjectConfiguration(_soapSessionId, projectId);
+            using (var content = new MultipartFormDataContent())
+            {
+                var fileContent = new ByteArrayContent(zipdata);
+                fileContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
+                {
+                    FileName = "filename.zip",
+                    Name = "zippedSource"
+                };
+                content.Add(fileContent);
 
-            if (!projectResponse.IsSuccesfull)
-                throw new Exception(projectResponse.ErrorMessage);
+                string requestUri = $"projects/{projectId}/sourceCode/attachments";
 
-            if (projectResponse.ProjectConfig.SourceCodeSettings.SourceOrigin == PortalSoap.SourceLocationType.Local)
-                throw new NotSupportedException("The location is setup for Local, we don't support it");
+                var result = httpClient.PostAsync(requestUri, content).Result;
+            }
 
+            ForceRunScan(projectId, comment);
+        }
+
+        public void ForceRunScan(long projectId, string comment = "")
+        {
             using (var request = new HttpRequestMessage(HttpMethod.Post, "sast/scans"))
             {
-                request.Headers.Add("Accept", "application/json;v=1.0");
-                request.Headers.Add("cxOrigin", "Checkmarx.API");
+                request.Headers.Add("Accept", "application/json;v=1.1");
+                request.Headers.Add("cxOrigin", "Log4Shell - Scan Scheduler");
 
                 var requestBody = JsonConvert.SerializeObject(new ScanDetails
                 {
@@ -860,14 +904,28 @@ namespace Checkmarx.API
                     request.Content = stringContent;
                     HttpResponseMessage response = httpClient.SendAsync(request).Result;
 
-                    if (response.StatusCode != HttpStatusCode.OK)
+                    if (response.StatusCode != HttpStatusCode.Created 
+                     && response.StatusCode != HttpStatusCode.OK)
                     {
                         throw new NotSupportedException(response.Content.ReadAsStringAsync().Result);
                     }
                 }
             }
+        }
 
-            throw new NotSupportedException();
+        public void RunSASTScan(long projectId, string comment = "")
+        {
+            checkConnection();
+
+            var projectResponse = _cxPortalWebServiceSoapClient.GetProjectConfiguration(_soapSessionId, projectId);
+
+            if (!projectResponse.IsSuccesfull)
+                throw new Exception(projectResponse.ErrorMessage);
+
+            if (projectResponse.ProjectConfig.SourceCodeSettings.SourceOrigin == PortalSoap.SourceLocationType.Local)
+                throw new NotSupportedException("The location is setup for Local, we don't support it");
+
+            ForceRunScan(projectId, comment);
         }
 
         public SASTResults GetSASTResults(long sastScanId)
@@ -1001,6 +1059,51 @@ namespace Checkmarx.API
             return _oDataScans.Count();
         }
 
+        public List<QueuedScan> GetScanQueue()
+        {
+            checkConnection();
+
+            using (var request = new HttpRequestMessage(HttpMethod.Get, $"sast/scansQueue"))
+            {
+                request.Headers.Add("Accept", "application/json;v=1.0");
+
+                HttpResponseMessage response = httpClient.SendAsync(request).Result;
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var objRes = response.Content.ReadAsStringAsync().Result;
+                    return JsonConvert.DeserializeObject<List<QueuedScan>>(objRes);
+                }
+
+                throw new NotSupportedException(response.Content.ReadAsStringAsync().Result);
+            }
+
+        }
+
+        public class ProjectLastScan
+        {
+            public long ProjectId { get; set; }
+            public long ScanId { get; set; }
+        }
+
+        public IEnumerable<ProjectLastScan> GetScansForLanguageNotScannedSince(string language, bool finished, DateTime notScannedSince)
+        {
+            checkConnection();
+
+            var projects = _oDataProjects
+                .Where(x => x.LastScan != null)
+                .Select(x => new 
+            { 
+                x.Id, x.LastScanId, x.LastScan.ScanCompletedOn, x.LastScan.ScannedLanguages, x.LastScan.ScanType
+            })
+                .ToList()
+                .Where(x => x.ScanCompletedOn <= notScannedSince)
+                .Where(x => x.ScannedLanguages.Where(y => y.LanguageName == language).Any())
+                .Where(x => x.ScanType != 3);
+
+            return projects.Select(x => new ProjectLastScan { ProjectId = x.Id, ScanId = x.LastScanId.Value });
+        }
+
         private IEnumerable<Scan> GetScans(long projectId, bool finished,
             ScanRetrieveKind scanKind = ScanRetrieveKind.All)
         {
@@ -1042,6 +1145,7 @@ namespace Checkmarx.API
                 IsLocked = scan.IsLocked,
                 InitiatorName = scan.InitiatorName,
                 OwningTeamId = scan.OwningTeamId,
+                ProjectId = scan.ProjectId,
                 ScanState = new ScanState
                 {
                     LanguageStateCollection = scan.ScannedLanguages.Select(language => new LanguageStateCollection
@@ -1495,7 +1599,7 @@ namespace Checkmarx.API
                 if (!string.IsNullOrWhiteSpace(item.Comment))
                 {
                     var commentsResults = _cxPortalWebServiceSoapClient.GetPathCommentsHistory(_soapSessionId, scanId, item.PathId,
-                         ResultLabelTypeEnum.Remark);
+                         PortalSoap.ResultLabelTypeEnum.Remark);
 
                     foreach (var comment in commentsResults.Path.Comment.Split(new[] { CommentSeparator },
                         StringSplitOptions.RemoveEmptyEntries))

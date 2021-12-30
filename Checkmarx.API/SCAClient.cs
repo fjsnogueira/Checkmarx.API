@@ -12,7 +12,10 @@ namespace Checkmarx.API
 {
     public class SCAClient
     {
-        private readonly HttpClient _httpClient = new HttpClient();
+        private readonly HttpClient _httpClient = new HttpClient(new HttpClientHandler()
+        {
+            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        });
         private string _username;
         private string _password;
         private string _tenant;

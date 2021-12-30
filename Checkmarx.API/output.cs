@@ -14133,242 +14133,242 @@ namespace Checkmarx.API
     
     
     }
-    
+
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.3.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class ResultLabelPatchModel 
+    public partial class ResultLabelPatchModel
     {
         [Newtonsoft.Json.JsonProperty("state", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? State { get; set; }
-    
+
         [Newtonsoft.Json.JsonProperty("severity", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Severity { get; set; }
-    
+
         [Newtonsoft.Json.JsonProperty("userAssignment", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string UserAssignment { get; set; }
-    
+
         [Newtonsoft.Json.JsonProperty("comment", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Comment { get; set; }
-    
-    
-        
-    
-    
-    /// <summary>Configuration group name associated with the settings to be updated</summary>
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.3.0 (Newtonsoft.Json v11.0.0.0)")]
-    public enum Group2
-    {
-        [System.Runtime.Serialization.EnumMember(Value = @"None")]
-        None = 0,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"AppSecCoach")]
-        AppSecCoach = 1,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"AuthorizationService")]
-        AuthorizationService = 2,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Portal")]
-        Portal = 3,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Scanning")]
-        Scanning = 4,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"SystemSettings")]
-        SystemSettings = 5,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"QueueSettings")]
-        QueueSettings = 6,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Audit")]
-        Audit = 7,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Logging")]
-        Logging = 8,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"DataRetention")]
-        DataRetention = 9,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Reports")]
-        Reports = 10,
-    
-    }
-    
-    /// <summary>Specifies the scan stage</summary>
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.3.0 (Newtonsoft.Json v11.0.0.0)")]
-    public enum ScanStatus
-    {
-        [System.Runtime.Serialization.EnumMember(Value = @"Scanning")]
-        Scanning = 0,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Finished")]
-        Finished = 1,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Canceled")]
-        Canceled = 2,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Failed")]
-        Failed = 3,
-    
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.3.0 (Newtonsoft.Json v11.0.0.0)")]
-    public enum SastScansDtoScanType
-    {
-        [System.Runtime.Serialization.EnumMember(Value = @"Unknown")]
-        Unknown = 0,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"AllScans")]
-        AllScans = 1,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Regular")]
-        Regular = 2,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Subset")]
-        Subset = 3,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Partial")]
-        Partial = 4,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Running")]
-        Running = 5,
-    
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.3.0 (Newtonsoft.Json v11.0.0.0)")]
-    public enum SastScansDtoFinishedScanStatus
-    {
-        [System.Runtime.Serialization.EnumMember(Value = @"None")]
-        None = 0,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Completed")]
-        Completed = 1,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Partial")]
-        Partial = 2,
-    
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.3.0 (Newtonsoft.Json v11.0.0.0)")]
-    public enum PartialScanDTOAbortedStatus
-    {
-        [System.Runtime.Serialization.EnumMember(Value = @"None")]
-        None = 0,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Queries")]
-        Queries = 1,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Stages")]
-        Stages = 2,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"QueriesExceededResultThreshold")]
-        QueriesExceededResultThreshold = 3,
-    
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.3.0 (Newtonsoft.Json v11.0.0.0)")]
-    public enum EngineServerResponsDtoStatus
-    {
-        [System.Runtime.Serialization.EnumMember(Value = @"Offline")]
-        Offline = 0,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Blocked")]
-        Blocked = 1,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"ScanningAndBlocked")]
-        ScanningAndBlocked = 2,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Scanning")]
-        Scanning = 3,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Idle")]
-        Idle = 4,
-    
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.3.0 (Newtonsoft.Json v11.0.0.0)")]
-    public enum PatchScansQueueStatus
-    {
-        [System.Runtime.Serialization.EnumMember(Value = @"Empty")]
-        Empty = 0,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Canceled")]
-        Canceled = 1,
-    
-        [System.Runtime.Serialization.EnumMember(Value = @"Postponed")]
-        Postponed = 2,
-    
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.11.1.0 (NJsonSchema v10.4.3.0 (Newtonsoft.Json v11.0.0.0))")]
-    internal class DateFormatConverter : Newtonsoft.Json.Converters.IsoDateTimeConverter
-    {
-        public DateFormatConverter()
-        {
-            DateTimeFormat = "yyyy-MM-dd";
-        }
-    }
 
-    [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.11.1.0 (NJsonSchema v10.4.3.0 (Newtonsoft.Json v11.0.0.0))")]
-    public partial class FileParameter
-    {
-        public FileParameter(System.IO.Stream data)
-            : this (data, null, null)
+
+
+
+
+        /// <summary>Configuration group name associated with the settings to be updated</summary>
+        [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.3.0 (Newtonsoft.Json v11.0.0.0)")]
+        public enum Group2
         {
+            [System.Runtime.Serialization.EnumMember(Value = @"None")]
+            None = 0,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"AppSecCoach")]
+            AppSecCoach = 1,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"AuthorizationService")]
+            AuthorizationService = 2,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"Portal")]
+            Portal = 3,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"Scanning")]
+            Scanning = 4,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"SystemSettings")]
+            SystemSettings = 5,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"QueueSettings")]
+            QueueSettings = 6,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"Audit")]
+            Audit = 7,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"Logging")]
+            Logging = 8,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"DataRetention")]
+            DataRetention = 9,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"Reports")]
+            Reports = 10,
+
         }
 
-        public FileParameter(System.IO.Stream data, string fileName)
-            : this (data, fileName, null)
+        /// <summary>Specifies the scan stage</summary>
+        [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.3.0 (Newtonsoft.Json v11.0.0.0)")]
+        public enum ScanStatus
         {
+            [System.Runtime.Serialization.EnumMember(Value = @"Scanning")]
+            Scanning = 0,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"Finished")]
+            Finished = 1,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"Canceled")]
+            Canceled = 2,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"Failed")]
+            Failed = 3,
+
         }
 
-        public FileParameter(System.IO.Stream data, string fileName, string contentType)
+        [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.3.0 (Newtonsoft.Json v11.0.0.0)")]
+        public enum SastScansDtoScanType
         {
-            Data = data;
-            FileName = fileName;
-            ContentType = contentType;
+            [System.Runtime.Serialization.EnumMember(Value = @"Unknown")]
+            Unknown = 0,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"AllScans")]
+            AllScans = 1,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"Regular")]
+            Regular = 2,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"Subset")]
+            Subset = 3,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"Partial")]
+            Partial = 4,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"Running")]
+            Running = 5,
+
         }
 
-        public System.IO.Stream Data { get; private set; }
+        [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.3.0 (Newtonsoft.Json v11.0.0.0)")]
+        public enum SastScansDtoFinishedScanStatus
+        {
+            [System.Runtime.Serialization.EnumMember(Value = @"None")]
+            None = 0,
 
-        public string FileName { get; private set; }
+            [System.Runtime.Serialization.EnumMember(Value = @"Completed")]
+            Completed = 1,
 
-        public string ContentType { get; private set; }
+            [System.Runtime.Serialization.EnumMember(Value = @"Partial")]
+            Partial = 2,
+
+        }
+
+        [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.3.0 (Newtonsoft.Json v11.0.0.0)")]
+        public enum PartialScanDTOAbortedStatus
+        {
+            [System.Runtime.Serialization.EnumMember(Value = @"None")]
+            None = 0,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"Queries")]
+            Queries = 1,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"Stages")]
+            Stages = 2,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"QueriesExceededResultThreshold")]
+            QueriesExceededResultThreshold = 3,
+
+        }
+
+        [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.3.0 (Newtonsoft.Json v11.0.0.0)")]
+        public enum EngineServerResponsDtoStatus
+        {
+            [System.Runtime.Serialization.EnumMember(Value = @"Offline")]
+            Offline = 0,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"Blocked")]
+            Blocked = 1,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"ScanningAndBlocked")]
+            ScanningAndBlocked = 2,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"Scanning")]
+            Scanning = 3,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"Idle")]
+            Idle = 4,
+
+        }
+
+        [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.3.0 (Newtonsoft.Json v11.0.0.0)")]
+        public enum PatchScansQueueStatus
+        {
+            [System.Runtime.Serialization.EnumMember(Value = @"Empty")]
+            Empty = 0,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"Canceled")]
+            Canceled = 1,
+
+            [System.Runtime.Serialization.EnumMember(Value = @"Postponed")]
+            Postponed = 2,
+
+        }
+
+        [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.11.1.0 (NJsonSchema v10.4.3.0 (Newtonsoft.Json v11.0.0.0))")]
+        internal class DateFormatConverter : Newtonsoft.Json.Converters.IsoDateTimeConverter
+        {
+            public DateFormatConverter()
+            {
+                DateTimeFormat = "yyyy-MM-dd";
+            }
+        }
+
+        [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.11.1.0 (NJsonSchema v10.4.3.0 (Newtonsoft.Json v11.0.0.0))")]
+        public partial class FileParameter
+        {
+            public FileParameter(System.IO.Stream data)
+                : this(data, null, null)
+            {
+            }
+
+            public FileParameter(System.IO.Stream data, string fileName)
+                : this(data, fileName, null)
+            {
+            }
+
+            public FileParameter(System.IO.Stream data, string fileName, string contentType)
+            {
+                Data = data;
+                FileName = fileName;
+                ContentType = contentType;
+            }
+
+            public System.IO.Stream Data { get; private set; }
+
+            public string FileName { get; private set; }
+
+            public string ContentType { get; private set; }
+        }
+
+        [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.11.1.0 (NJsonSchema v10.4.3.0 (Newtonsoft.Json v11.0.0.0))")]
+        public partial class ApiException : System.Exception
+        {
+            public int StatusCode { get; private set; }
+
+            public string Response { get; private set; }
+
+            public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IEnumerable<string>> Headers { get; private set; }
+
+            public ApiException(string message, int statusCode, string response, System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IEnumerable<string>> headers, System.Exception innerException)
+                : base(message + "\n\nStatus: " + statusCode + "\nResponse: \n" + ((response == null) ? "(null)" : response.Substring(0, response.Length >= 512 ? 512 : response.Length)), innerException)
+            {
+                StatusCode = statusCode;
+                Response = response;
+                Headers = headers;
+            }
+
+            public override string ToString()
+            {
+                return string.Format("HTTP Response: \n\n{0}\n\n{1}", Response, base.ToString());
+            }
+        }
+
+        [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.11.1.0 (NJsonSchema v10.4.3.0 (Newtonsoft.Json v11.0.0.0))")]
+        public partial class ApiException<TResult> : ApiException
+        {
+            public TResult Result { get; private set; }
+
+            public ApiException(string message, int statusCode, string response, System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IEnumerable<string>> headers, TResult result, System.Exception innerException)
+                : base(message, statusCode, response, headers, innerException)
+            {
+                Result = result;
+            }
+        }
     }
-
-    [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.11.1.0 (NJsonSchema v10.4.3.0 (Newtonsoft.Json v11.0.0.0))")]
-    public partial class ApiException : System.Exception
-    {
-        public int StatusCode { get; private set; }
-
-        public string Response { get; private set; }
-
-        public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IEnumerable<string>> Headers { get; private set; }
-
-        public ApiException(string message, int statusCode, string response, System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IEnumerable<string>> headers, System.Exception innerException)
-            : base(message + "\n\nStatus: " + statusCode + "\nResponse: \n" + ((response == null) ? "(null)" : response.Substring(0, response.Length >= 512 ? 512 : response.Length)), innerException)
-        {
-            StatusCode = statusCode;
-            Response = response;
-            Headers = headers;
-        }
-
-        public override string ToString()
-        {
-            return string.Format("HTTP Response: \n\n{0}\n\n{1}", Response, base.ToString());
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.11.1.0 (NJsonSchema v10.4.3.0 (Newtonsoft.Json v11.0.0.0))")]
-    public partial class ApiException<TResult> : ApiException
-    {
-        public TResult Result { get; private set; }
-
-        public ApiException(string message, int statusCode, string response, System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IEnumerable<string>> headers, TResult result, System.Exception innerException)
-            : base(message, statusCode, response, headers, innerException)
-        {
-            Result = result;
-        }
-    }
-
 }
 
 #pragma warning restore 1591

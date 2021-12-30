@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using CxDataRepositoryV9;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -11,7 +12,7 @@ namespace Checkmarx.API.SAST
         public long Id { get; set; }
 
         [JsonProperty("project")]
-        public EngineServer Project { get; set; }
+        public long? ProjectId { get; set; }
 
         [JsonProperty("status")]
         public Status Status { get; set; }

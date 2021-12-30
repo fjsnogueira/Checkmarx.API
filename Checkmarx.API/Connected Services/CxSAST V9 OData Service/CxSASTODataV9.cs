@@ -6606,6 +6606,7 @@ namespace DefaultV9
             this.OnContextCreated();
             this.Format.LoadServiceModel = GeneratedEdmModel.GetInstance;
             this.Format.UseJson();
+            this.Timeout = 60 * 10;
         }
         partial void OnContextCreated();
         /// <summary>

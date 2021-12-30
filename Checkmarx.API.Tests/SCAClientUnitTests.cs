@@ -36,27 +36,27 @@ namespace Checkmarx.API.Tests.SCA
             Assert.IsTrue(true);
         }
 
-        [TestMethod]
-        public void GetProject()
-        {
-            var client = new SCAClient(Tenant, AC, APIURL, Username, Password);
-            if (client.Connected)
-            {
-                var project = client.ClientSCA.Projects3Async(new Guid("cbec47bd-67b6-468b-8ade-f621fc0eaa17")).Result;
-                Assert.IsNotNull(project);
-            }
-        }
+        //[TestMethod]
+        //public void GetProject()
+        //{
+        //    var client = new SCAClient(Tenant, AC, APIURL, Username, Password);
+        //    if (client.Connected)
+        //    {
+        //        var project = client.ClientSCA.Projects3Async(new Guid("cbec47bd-67b6-468b-8ade-f621fc0eaa17")).Result;
+        //        Assert.IsNotNull(project);
+        //    }
+        //}
 
-        [TestMethod]
-        public void GetScan()
-        {
-            var client = new SCAClient(Tenant, AC, APIURL, Username, Password);
-            if (client.Connected)
-            {
-                var scan = client.ClientSCA.ScansAsync(new Guid("fb1ad6e0-c26c-401b-8b24-2295cc5fb9e9")).Result;
-                Assert.IsNotNull(scan);
-            }
-        }
+        //[TestMethod]
+        //public void GetScan()
+        //{
+        //    var client = new SCAClient(Tenant, AC, APIURL, Username, Password);
+        //    if (client.Connected)
+        //    {
+        //        var scan = client.ClientSCA.ScansAsync(new Guid("fb1ad6e0-c26c-401b-8b24-2295cc5fb9e9")).Result;
+        //        Assert.IsNotNull(scan);
+        //    }
+        //}
         [TestMethod]
         public void MyTestMethod()
         {
