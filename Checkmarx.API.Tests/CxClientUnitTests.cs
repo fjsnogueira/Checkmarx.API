@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -11,6 +12,7 @@ using System.Threading;
 using System.Web;
 using System.Xml.Linq;
 using Checkmarx.API;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
@@ -69,6 +71,69 @@ namespace Checkmarx.API.Tests
 
         }
 
+
+        [TestMethod]
+        public void GetSourceCodeAndRunScanTest()
+        {
+            //var projectId = clientV93.GetProjects().First().Key;
+            //// var scanID = clientV9.GetAllSASTScans(projectId).First().Id;
+
+            //clientV9.RunSASTScan(projectId);
+
+            string fileNAme = @"mysource.zip";
+            File.WriteAllBytes(fileNAme, clientV9.GetSourceCode(1006182));
+
+            Assert.IsTrue(File.Exists(fileNAme));
+
+
+        }
+
+        [TestMethod]
+        public void SuggestExclusionsTest()
+        {
+            string extractPath = Path.GetTempFileName();
+
+            string zipPath = Path.GetTempFileName();
+
+            File.WriteAllBytes(zipPath, clientV9.GetSourceCode(1006182));
+
+            // unzip
+            ZipFile.ExtractToDirectory(zipPath, extractPath);
+
+            var exclusions = Exclusions.FromJson("exclusion.json");
+
+            Regex[] filesRegex = exclusions.Files.Select(x => new Regex(x, RegexOptions.Compiled)).ToArray();
+            Regex[] foldersRegex = exclusions.Folders.Select(x => new Regex(x, RegexOptions.Compiled)).ToArray();
+
+            // detect exclusions
+            foreach (var directoy in Directory.EnumerateDirectories(extractPath, "*.*"))
+            {
+                if (foldersRegex.Any(x => x.Match(directoy).Success))
+                {
+
+                }
+            }
+
+            foreach (var file in Directory.EnumerateFiles(extractPath, "*.*"))
+            {
+                if (filesRegex.Any(x => x.Match(file).Success))
+                {
+
+                }
+            }
+
+            // detect multilanguage
+        }
+
+
+        [TestMethod]
+        public void ConnectionTest()
+        {
+            CxClient clientTEst = new CxClient(new Uri(""), "", "w");
+            Assert.IsTrue(clientTEst.Connected);
+        }
+
+
         [TestMethod]
         public void TestGetVersion()
         {
@@ -78,7 +143,6 @@ namespace Checkmarx.API.Tests
         [TestMethod]
         public void TestGetOSA_V9()
         {
-
             var license = clientV9.GetLicense();
 
             Assert.IsTrue(license.IsOsaEnabled);
@@ -88,7 +152,6 @@ namespace Checkmarx.API.Tests
         [TestMethod]
         public void TestGetOSA_V8()
         {
-
             var license = clientV89.GetLicense();
 
             Assert.IsTrue(license.IsOsaEnabled);
@@ -97,7 +160,6 @@ namespace Checkmarx.API.Tests
         [TestMethod]
         public void V9ConnectTest()
         {
-
             foreach (var item in clientV9.GetProjects())
             {
                 Trace.WriteLine(item.Key);
@@ -213,15 +275,22 @@ namespace Checkmarx.API.Tests
 
 
         [TestMethod]
-        public void GetPreset()
+        public void GetPresetTest()
         {
-            var presets = clientV89.GetPresets();
-
-            foreach (var item in clientV89.GetProjects())
+            foreach (var item in clientV89.GetPresets())
             {
-                Trace.WriteLine($"{item.Key} " + clientV89.GetSASTPreset(item.Key));
+                Trace.WriteLine($"{item.Key} {item.Value}");
+
+                clientV89.GetPresetCWE(item.Value);
             }
         }
+
+        [TestMethod]
+        public void GetQueriesInformationTest()
+        {
+            Trace.WriteLine(clientV9.GetQueryInformation().ToString());
+        }
+
 
         [TestMethod]
         public void SetScanSettings()
@@ -259,6 +328,7 @@ namespace Checkmarx.API.Tests
             clientV89.GetProjectCreationDate(9);
 
         }
+
         [TestMethod]
         public void TestCreationDateV9()
         {
@@ -291,7 +361,7 @@ namespace Checkmarx.API.Tests
 
 
         [TestMethod]
-        public void GetCustomQueries()
+        public void ExtractCustomQueries()
         {
             string rootPath = @"D:\queries";
 
@@ -302,9 +372,7 @@ namespace Checkmarx.API.Tests
             var projects = clientV93.GetProjects();
             var teams = clientV93.GetTeams();
 
-
-
-            foreach (var queryGroup in clientV93.GetQueries())
+            foreach (var queryGroup in clientV93.QueryGroups)
             {
                 if (queryGroup.PackageType == cxPortalWebService93.CxWSPackageTypeEnum.Cx)
                     continue;
@@ -369,23 +437,21 @@ namespace Checkmarx.API.Tests
         [TestMethod]
         public void GetResultsForScan()
         {
-            var queries = clientV9.GetQueries().SelectMany(x => x.Queries).ToDictionary(x => x.QueryId);
+            var queries = clientV93.GetQueries().SelectMany(x => x.Queries).ToDictionary(x => x.QueryId);
 
             StringBuilder sb = new StringBuilder();
 
-            foreach (var result in clientV9.GetResultsForScan(1004107).GroupBy(x => x.Severity)) // 
+            foreach (var result in clientV9.GetResultsForScan(1006616).GroupBy(x => x.Severity)) // 
             {
-                Trace.WriteLine("##" + CxClient.toSeverityToString(result.Key));
+                sb.AppendLine(CxClient.toSeverityToString(result.Key));
 
                 foreach (var severity in result.GroupBy(x => x.QueryId))
                 {
-                    Trace.WriteLine("\t#" + queries[severity.Key].Name);
+                    sb.AppendLine(queries[severity.Key].Name);
 
                     foreach (var item in severity)
                     {
-                        
-
-                        Trace.WriteLine("\t\t * " + item.PathId + " " + CxClient.toResultStateToString((ResultState)item.State));
+                        sb.AppendLine($"{ item.PathId } {CxClient.toResultStateToString((ResultState)item.State)}");
                     }
 
                 }
@@ -461,12 +527,10 @@ namespace Checkmarx.API.Tests
         [TestMethod]
         public void GetCWEDescription()
         {
-
             foreach (var queryGroup in clientV89.GetQueries())
             {
                 foreach (var query in queryGroup.Queries)
                 {
-
                     if (query.Cwe != 0)
                         Trace.WriteLine(clientV89.GetCWEDescription(query.Cwe));
                 }
@@ -486,7 +550,6 @@ namespace Checkmarx.API.Tests
             }
 
             Assert.IsNotNull(result);
-
         }
 
         [TestMethod]
@@ -508,7 +571,6 @@ namespace Checkmarx.API.Tests
                     Trace.WriteLine(string.Join(";", item.ScanState?.LanguageStateCollection));
                 }
             }
-
         }
 
         const string DATE_FORMAT = "yyyy-MM-dd";
@@ -533,7 +595,6 @@ namespace Checkmarx.API.Tests
             Assert.IsNotNull(result);
         }
 
-
         [TestMethod]
         public void GetLicenseInfoTest()
         {
@@ -545,10 +606,7 @@ namespace Checkmarx.API.Tests
             Trace.WriteLine($"License: {DateTime.Parse(info.ExpirationDate).ToString()}");
 
             Assert.IsNotNull(info);
-
-
         }
-
 
         [TestMethod]
         public void TestCxUpgradeProject()
@@ -565,9 +623,8 @@ namespace Checkmarx.API.Tests
             }
         }
 
-
         [TestMethod]
-        public void ListConfigurationsTests()
+        public void ListComponentConfigurationsTests()
         {
             foreach (var item in Enum.GetValues(typeof(SAST.Group)))
             {
@@ -575,17 +632,285 @@ namespace Checkmarx.API.Tests
 
                 foreach (var configuration in clientV9.GetConfigurations((SAST.Group)item))
                 {
-                    Trace.WriteLine("\t"+  configuration.Key + " -> " + configuration.Description + "\n\t" + configuration.Value);
+                    Trace.WriteLine("\t" + configuration.Key + " -> " + configuration.Description + "\n\t" + configuration.Value);
                 }
             }
 
             // Check if the Codebashing integration is done -> codebashingIsEnabled
             // Check if the action to do after the incremental is FULL instead of FAIL -> INCREMENTAL_SCAN_THRESHOLD_ACTION
             // Check if the STMP configuration is turned on -> SMTPHost
-
-
-
         }
 
+        [TestMethod]
+        public void GetCompareScansTest()
+        {
+            var results = clientV93.GetScansDiff(234, 234234);
+
+            foreach (var item in results.GroupBy(x => x.ResultStatus))
+            {
+
+            }
+        }
+
+        [TestMethod]
+        public void GetSourceCodeTest()
+        {
+            clientV89.GetSourceCode(2323);
+
+            //Assert.IsTrue(clientV89.Connected);
+            //Assert.IsTrue(File.Exists(""));
+        }
+
+
+        [TestMethod]
+        public void RunScanOnTheLatestVersion()
+        {
+            var version = clientV93.Version;
+
+            foreach (var project in clientV93.GetProjects())
+            {
+                Trace.WriteLine(project.Value);
+
+                var lastScan = clientV93.GetLastScan(project.Key);
+                if (lastScan != null)
+                {
+                    if (!lastScan.ScanState.CxVersion.EndsWith("HF10"))
+                    {
+                        clientV93.RunSASTScan(project.Key);
+                    }
+                }
+
+                Trace.WriteLine(string.Empty);
+            }
+        }
+
+        [TestMethod]
+        public void GetFailingScansTests()
+        {
+
+
+            foreach (var item in clientV93.FailedScans.GroupBy(x => x.ProjectId))
+            {
+                Trace.WriteLine("Project " + item.First().ProjectName);
+
+                foreach (var reasons in item.Reverse())
+                {
+                    string reason = reasons.Details;
+                    if (reason.EndsWith('\n'))
+                        reason = reasons.Details.Remove(reasons.Details.IndexOf('\n'));
+
+                    Trace.WriteLine("\t" + reason + " with LoC : " + reasons.LOC
+                        + " on " + new DateTime(reasons.CreatedOn).ToString()
+                        + " started by " + reasons.Initiator);
+                }
+            }
+        }
+
+
+        [TestMethod]
+        public void GetPresets()
+        {
+            foreach (var item in clientV89.GetPresets())
+            {
+                Trace.WriteLine(item.Value);
+            }
+        }
+
+        [TestMethod]
+        public void MyTestMethod()
+        {
+            //foreach (var item in clientV89.GetProjects())
+            //{
+            //    Trace.WriteLine(item.Value);
+            //}
+
+
+
+            foreach (var item in clientV89.GetPresets())
+            {
+                if (item.Value.Contains("ASA"))
+                {
+                    //  Trace.WriteLine(clientV89.GetPresetCWE(item.Value));
+                }
+            }
+
+            //foreach (dynamic item in clientV89.QueryGroups)
+            //{
+            //    foreach (var query in item.Queries)
+            //    {
+            //        Trace.WriteLine((string)query.Source);
+            //    }
+            //}
+        }
+
+        [TestMethod]
+        public void GetVersionWithoutConnectingTest()
+        {
+            Trace.WriteLine(GetVersionWithoutConnecting(@"https://localhost/"));
+        }
+
+
+        [TestMethod]
+        public void GetNotExploitableResults()
+        {
+            var projects = clientV93.GetProjects();
+
+            var date = (DateTime.Now - TimeSpan.FromDays(30)).Date;
+
+            var last2MonthScans = clientV93.GetScansFromOData(1).Where(x => x.EngineStartedOn.Date > date);
+
+            Dictionary<long, CxAuditWebServiceV9.CxWSResultPath> similarityIdResult =
+                new Dictionary<long, CxAuditWebServiceV9.CxWSResultPath>();
+
+            StringBuilder stringBuilder = new StringBuilder();
+
+            var project = projects[1];
+
+            stringBuilder.AppendLine($"<h1>{project}</h1>");
+
+            var queries = clientV93.GetQueries().SelectMany(x => x.Queries).ToDictionary(x => x.QueryId);
+
+            foreach (var scan in last2MonthScans)
+            {
+                var scanResults = clientV93.GetResultsForScan(scan.Id);
+                foreach (var results in scanResults.GroupBy(x => x.Severity))
+                {
+                    stringBuilder.AppendLine("<h2>" + toSeverityToString(results.Key) + "</h2>");
+
+                    foreach (var severity in results.GroupBy(x => x.QueryId))
+                    {
+                        stringBuilder.AppendLine("<h3>" + queries[severity.Key].Name + "</h3>");
+
+                        foreach (var result in severity)
+                        {
+                            if (((ResultState)result.State) == ResultState.NonExploitable)
+                            {
+                                var pathhistory = clientV93.GetPathCommentsHistory(scan.Id, result.PathId);
+
+                                var uri = Utils.GetLink(result, clientV93, 1, scan.Id);
+
+                                stringBuilder.AppendLine($"<a href=\"{uri.AbsoluteUri}\">{uri.AbsoluteUri}</a>");
+
+                                stringBuilder.AppendLine("<ul>");
+                                foreach (var comment in result.Comment.Split(CommentSeparator, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    stringBuilder.AppendLine("<li><p>" + comment + "</p></li>");
+                                }
+                                stringBuilder.AppendLine("</ul>");
+                            }
+                        }
+                    }
+                }
+            }
+
+            File.WriteAllText(@"ne.html", stringBuilder.ToString());
+        }
+
+        [TestMethod]
+        public void GetNotExploitableResultsAudit()
+        {
+            var projects = clientV93.GetProjects();
+
+            var date = (DateTime.Now - TimeSpan.FromDays(60)).Date;
+
+            HashSet<long> similarityIdResult =
+                    new HashSet<long>();
+
+            StringBuilder stringBuilder = new StringBuilder();
+
+
+            foreach (var project in projects)
+            {
+                var last2MonthScans = clientV93.GetScansFromOData(project.Key).Where(x => x.EngineStartedOn.Date > date).ToArray();
+
+                if (!last2MonthScans.SelectMany(x => clientV93.GetResult(x.Id))
+                      .Where(x => x.PathPerResult.Any(y => ((ResultState)y.State) == ResultState.NonExploitable && !similarityIdResult.Contains(y.SimilarityId)))
+                      .Any())
+                {
+                    continue;
+                }
+
+                stringBuilder.AppendLine($"<h1>{project.Value}</h1>");
+                stringBuilder.AppendLine("<ul>");
+
+                foreach (var scan in last2MonthScans)
+                {
+                    // stringBuilder.AppendLine($"<h2>Scan: {scan.Id}</h2>");
+
+                    var scanResults = clientV93.GetResult(scan.Id).Where(x => x.PathPerResult.Any(y => ((ResultState)y.State) == ResultState.NonExploitable && !similarityIdResult.Contains(y.SimilarityId)));
+
+                    if (!scanResults.Any())
+                        continue;
+
+                    stringBuilder.AppendLine("<li>");
+
+                    foreach (var resultsBySeverity in scanResults.GroupBy(x => x.Severity))
+                    {
+                        stringBuilder.AppendLine("<h3>" + toSeverityToString(resultsBySeverity.Key) + "</h3>");
+                        stringBuilder.AppendLine("<ul>");
+
+                        foreach (var resultsByQuery in resultsBySeverity.GroupBy(x => x.QueryId))
+                        {
+                            stringBuilder.AppendLine($"<h4> { resultsByQuery.First().QueryName } [{resultsByQuery.Key}]</h4>");
+
+                            stringBuilder.AppendLine("<li>");
+                            stringBuilder.AppendLine("<ul>");
+
+                            foreach (var result in resultsByQuery)
+                            {
+                                foreach (var resultPath in result.PathPerResult.Where(y => ((ResultState)y.State) == ResultState.NonExploitable))
+                                {
+                                    if (similarityIdResult.Contains(resultPath.SimilarityId))
+                                        continue;
+
+                                    similarityIdResult.Add(resultPath.SimilarityId);
+
+                                    var uri = Utils.GetLink(resultPath, clientV93, project.Key, scan.Id);
+
+                                    stringBuilder.AppendLine("<li>");
+                                    stringBuilder.AppendLine($"<a href=\"{uri.AbsoluteUri}\">Result [{toResultStateToString((ResultState)resultPath.State)}]</a>");
+
+                                    stringBuilder.AppendLine("<ul>");
+                                    foreach (var comment in resultPath.Comment.Split(CommentSeparator, StringSplitOptions.RemoveEmptyEntries).Reverse())
+                                    {
+                                        stringBuilder.AppendLine("<li><p>" + comment + "</p></li>");
+                                    }
+                                    stringBuilder.AppendLine("</ul>");
+                                    stringBuilder.AppendLine("</li>");
+
+                                }
+                            }
+
+                            stringBuilder.AppendLine("</ul>");
+                            stringBuilder.AppendLine("</li>");
+                        }
+
+                        stringBuilder.AppendLine("</ul>");
+                    }
+
+                    stringBuilder.AppendLine("</li>");
+                }
+
+                stringBuilder.AppendLine("</ul>");
+            }
+
+            File.WriteAllText(@"ne_allprojects.html", stringBuilder.ToString());
+        }
+
+
+        [TestMethod]
+        public void GetODataCommentsTest()
+        {
+            foreach (var item in clientV93.GetODataResults(1031805).Where(x => x.PathId == 38))
+            {
+                var uri = Utils.GetLink(item, clientV93, item.Scan.ProjectId, item.ScanId);
+
+                Trace.WriteLine($"{uri.AbsoluteUri}");
+
+                Trace.WriteLine("scanid=" + item.ScanId);
+                Trace.WriteLine("pathid=" + item.PathId);
+                Trace.WriteLine(item.Comment);
+            }
+        }
     }
 }
